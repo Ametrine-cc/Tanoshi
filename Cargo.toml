@@ -1,0 +1,28 @@
+[package]
+name = "Tanoshi"
+version = "0.1.0"
+authors = [
+  "Ametrine Foundation <business@ametrine.cc>",
+  "Noticxs <noticxs@ametrine.cc>",
+]
+edition = "2024"
+description = "A delightful desktop environment, made with love and care."
+license = "GPL-3.0-or-later"
+repository = "https://github.com/Ametrine-cc/Tanoshi.git"
+readme = "README.md"
+
+include = [
+  "src/**/*",
+  "README.md",
+  "LICENSE"
+]
+
+[dependencies]
+
+[[bin]]
+name = "tanoshi"
+path = "src/bin/window_manager/main.rs"
+
+[[bin]]
+name = "tanoshi-shell"
+path = "src/bin/shell/main.rs"
