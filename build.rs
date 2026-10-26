@@ -20,5 +20,5 @@
 */
 
 fn main() {
-    println!("Hello, from tanoshi window manager!");
+    slint_build::compile("ui/shell.slint").unwrap();
 }

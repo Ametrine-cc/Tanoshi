@@ -18,11 +18,13 @@ include = [
 ]
 
 [dependencies]
+slint = { version = "1.9", features = ["renderer-software"] }
+chrono = "0.4"
+layer-shika = "0.3.1"
 
-[[bin]]
-name = "tanoshi"
-path = "src/bin/window_manager/main.rs"
+[build-dependencies]
+slint-build = "1.9"
 
-[[bin]]
-name = "tanoshi-shell"
-path = "src/bin/shell/main.rs"
+# [[bin]]
+# name = "tanoshi"
+# path = "src/bin/window_manager/main.rs"
