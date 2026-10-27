@@ -19,48 +19,66 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-use layer_shika::prelude::*;
-use std::time::Duration;
+use chrono::Local as time;
+use iced::widget::{container, row, text};
+use iced::{Background, Color, Element, Length, Task, window};
 
-fn main() -> Result<()> {
-    // Load the shell
-    let mut runtime = Shell::from_file("ui/shell.slint")
-        .surface("DesktopShell")
-        .height(36)
-        .anchor(AnchorEdges::top_bar())
-        .exclusive_zone(-1)
-        .build()?;
+mod window_rules;
 
-    let event_loop = runtime.event_loop_handle();
-
-    // Clock timer
-    event_loop.add_timer(Duration::from_secs(1), |_deadline, app_state| {
-        let time = chrono::Local::now().format("%H:%M").to_string();
-        let value = layer_shika::slint_interpreter::Value::from(
-            layer_shika::slint::SharedString::from(time),
-        );
-
-        for surface in app_state.all_outputs_mut() {
-            let _ = surface
-                .component_instance()
-                .set_property("current-time", value.clone());
+fn main() -> iced::Result {
+    // Call the function and unpack the Option
+    match window_rules::get_combined_screen_size() {
+        Some((x, y, width, height)) => {
+            println!("Virtual Desktop Bounds Found:");
+            println!("  Top-Left Origin: X = {}, Y = {}", x, y);
+            println!("  Combined Size:   {}x{} pixels", width, height);
         }
-
-        layer_shika::calloop::TimeoutAction::ToDuration(Duration::from_secs(1))
-    })?;
-
-    runtime.with_component("DesktopShell", |component| {
-        let result = component.set_callback("launcher-clicked", |_args| {
-            println!("Launcher button tapped");
-            layer_shika::slint_interpreter::Value::Void
-        });
-
-        if let Err(error) = result {
-            eprintln!("Could not register launcher callback: {error}");
+        None => {
+            println!("Could not retrieve monitor information.");
         }
-    });
+    }
 
-    // Start Tenoshi shell
-    runtime.run()?;
-    Ok(())
+    iced::application(Tanoshi::new, Tanoshi::update, Tanoshi::view)
+        .title("Tanoshi")
+        .window_size((w as f32, 40.0))
+        .decorations(false)
+        .resizable(false)
+        .level(window::Level::AlwaysOnTop)
+        .run()
+}
+
+#[derive(Debug, Clone)]
+enum Message {}
+
+struct Tanoshi {
+    current_time: String,
+}
+
+impl Tanoshi {
+    fn new() -> (Self, Task<Message>) {
+        let current_time = time::now().format("%H:%M").to_string();
+        (Self { current_time }, Task::none())
+    }
+
+    fn update(&mut self, _message: Message) {}
+
+    fn view(&self) -> Element<'_, Message> {
+        let content = row![
+            text("TITLE:[Tanoshi]").size(16),
+            iced::widget::Space::new(),
+            text(format!("TIME:[{}]", self.current_time)).size(16),
+        ]
+        .align_y(iced::Alignment::Center);
+
+        container(content)
+            .width(Length::Fill)
+            .height(Length::Fill)
+            .padding(10)
+            .style(|_theme| container::Style {
+                background: Some(Background::Color(Color::from_rgb(0.1, 0.1, 0.15))),
+                text_color: Some(Color::WHITE),
+                ..Default::default()
+            })
+            .into()
+    }
 }
